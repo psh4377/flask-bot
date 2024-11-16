@@ -64,6 +64,24 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+    # 봇 자신의 메시지는 무시
+    if message.author == client.user:
+        return
+
+    # '!clear' 명령어 처리
+    if message.content.startswith('!clear'):
+        # 채널 권한 확인
+        if not message.channel.permissions_for(message.author).manage_messages:
+            await message.channel.send("권한이 없다고 하네요. 카드는 주고 일하라 하셔야죠…")
+            return
+
+        # 메시지 삭제 작업 시작
+        await message.channel.send("지우는 중이니까 좀 기다려요.")
+        deleted = await message.channel.purge(limit=100)  # 최근 100개의 메시지 삭제
+        await message.channel.send(f"한 {len(deleted)} 마디 정도 지운 것 같은데. 작작 쓰세요.")
+        return
+
+    # 다른 메시지 처리 (이미지 업로드)
     if message.attachments:
         for attachment in message.attachments:
             if attachment.content_type and attachment.content_type.startswith('image/'):
@@ -92,21 +110,3 @@ if __name__ == "__main__":
     threading.Thread(target=run_discord_bot, daemon=True).start()
     print("Starting Flask server...")
     app.run(host="0.0.0.0", port=port)
-
-@client.event
-async def on_message(message):
-    # 봇 자신의 메시지는 무시
-    if message.author == client.user:
-        return
-
-    # 메시지가 지정된 명령어라면
-    if message.content.startswith('!clear'):
-        # 채널 권한 확인
-        if not message.channel.permissions_for(message.author).manage_messages:
-            await message.channel.send("권한이 없다고 하네요. 카드는 주고 일하라 하셔야죠…")
-            return
-
-        # 메시지 삭제 작업 시작
-        await message.channel.send("지우는 중이니까 좀 기다려요.")
-        deleted = await message.channel.purge(limit=None)  # 채널의 모든 메시지 삭제
-        await message.channel.send(f"한 {len(deleted)} 마디 정도 지운 것 같은데. 작작 쓰세요.")
