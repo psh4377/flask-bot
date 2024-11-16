@@ -93,3 +93,20 @@ if __name__ == "__main__":
     print("Starting Flask server...")
     app.run(host="0.0.0.0", port=port)
 
+@client.event
+async def on_message(message):
+    # 봇 자신의 메시지는 무시
+    if message.author == client.user:
+        return
+
+    # 메시지가 지정된 명령어라면
+    if message.content.startswith('!clear'):
+        # 채널 권한 확인
+        if not message.channel.permissions_for(message.author).manage_messages:
+            await message.channel.send("You don't have permission to delete messages.")
+            return
+
+        # 메시지 삭제 작업 시작
+        await message.channel.send("Deleting all messages in this channel...")
+        deleted = await message.channel.purge(limit=None)  # 채널의 모든 메시지 삭제
+        await message.channel.send(f"Deleted {len(deleted)} messages.")
