@@ -40,7 +40,7 @@ def image_page():
             <meta name="twitter:image" content="{full_image_url}" />
         </head>
         <body>
-            <h1>Shared Image</h1>
+            <h1></h1>
             <img src="{full_image_url}" alt="Shared Image" />
         </body>
         </html>
