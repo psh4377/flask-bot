@@ -16,11 +16,11 @@ app = Flask(__name__)
 @app.route('/image')
 def image_page():
     try:
-        # 요청받은 URL을 가져옵니다
+        # 요청받은 URL 가져오기
         encoded_image_url = request.args.get('full_url', '').strip()
         logging.info(f"Encoded image URL received: {encoded_image_url}")
 
-        # URL을 디코딩합니다
+        # URL 디코딩
         full_image_url = urllib.parse.unquote(encoded_image_url)
         logging.info(f"Full image URL after decoding: {full_image_url}")
 
@@ -29,18 +29,18 @@ def image_page():
         <html>
         <head>
             <meta charset="utf-8">
-            <meta property="og:title" content=" " />
+            <meta property="og:title" content="Shared Image" />
             <meta property="og:description" content="This image was uploaded via Discord." />
             <meta property="og:image" content="{full_image_url}" />
             <meta property="og:type" content="website" />
             <meta property="og:url" content="{request.url}" />
             <meta name="twitter:card" content="summary_large_image" />
-            <meta name="twitter:title" content=" " />
+            <meta name="twitter:title" content="Shared Image" />
             <meta name="twitter:description" content="This image was uploaded via Discord." />
             <meta name="twitter:image" content="{full_image_url}" />
         </head>
         <body>
-            <h1> . </h1>
+            <h1>Shared Image</h1>
             <img src="{full_image_url}" alt="Shared Image" />
         </body>
         </html>
@@ -48,9 +48,10 @@ def image_page():
         logging.info("HTML template successfully generated.")
         return html_template
     except Exception as e:
-        # 예외 발생 시 로그 출력 및 500 에러 반환
+        # 오류 발생 시 로그 출력 및 에러 반환
         logging.error(f"Error in /image route: {e}")
         return "An error occurred while processing your request.", 500
+
 
 
 # Discord 봇 설정
@@ -111,3 +112,5 @@ if __name__ == "__main__":
     threading.Thread(target=run_discord_bot, daemon=True).start()
     print("Starting Flask server...")
     app.run(host="0.0.0.0", port=port)
+
+logging.info(f"Generated HTML: {html_template}")
