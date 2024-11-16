@@ -103,10 +103,10 @@ async def on_message(message):
     if message.content.startswith('!clear'):
         # 채널 권한 확인
         if not message.channel.permissions_for(message.author).manage_messages:
-            await message.channel.send("You don't have permission to delete messages.")
+            await message.channel.send("권한이 없다고 하네요. 카드는 주고 일하라 하셔야죠…")
             return
 
         # 메시지 삭제 작업 시작
-        await message.channel.send("Deleting all messages in this channel...")
+        await message.channel.send("지우는 중이니까 좀 기다려요.")
         deleted = await message.channel.purge(limit=None)  # 채널의 모든 메시지 삭제
-        await message.channel.send(f"Deleted {len(deleted)} messages.")
+        await message.channel.send(f"한 {len(deleted)} 마디 정도 지운 것 같은데. 작작 쓰세요.")
