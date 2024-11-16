@@ -38,7 +38,6 @@ def image_page():
             <meta name="twitter:title" content="Shared Image" />
             <meta name="twitter:description" content="This image was uploaded via Discord." />
             <meta name="twitter:image" content="{full_image_url}" />
-            
         </head>
         <body>
             <h1>Shared Image</h1>
