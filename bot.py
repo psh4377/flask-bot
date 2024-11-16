@@ -38,12 +38,7 @@ def image_page():
             <meta name="twitter:title" content="Shared Image" />
             <meta name="twitter:description" content="This image was uploaded via Discord." />
             <meta name="twitter:image" content="{full_image_url}" />
-             <style>
-        h1 {
-            font-size: 10px; /* 텍스트 크기를 작게 설정 */
-            color: #f5f5f5; /* 거의 안 보이는 색상으로 설정 */
-        }
-    </style>
+            
         </head>
         <body>
             <h1>Shared Image</h1>
