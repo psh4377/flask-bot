@@ -75,8 +75,9 @@ def run_discord_bot():
         logging.error(f"Error while running Discord bot: {e}")
 
 if __name__ == "__main__":
-    # 디스코드 봇 비동기 실행
+    # Railway 환경 변수를 사용하여 포트 설정
+    port = int(os.getenv("PORT", 8080))  # 기본값 8080
     threading.Thread(target=run_discord_bot, daemon=True).start()
-    # Flask 서버 실행
-    logging.info("Starting Flask server...")
-    app.run(host="0.0.0.0", port=8080)
+    print("Starting Flask server...")
+    app.run(host="0.0.0.0", port=port)
+
