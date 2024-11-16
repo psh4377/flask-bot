@@ -29,13 +29,13 @@ def image_page():
         <html>
         <head>
             <meta charset="utf-8">
-            <meta property="og:title" content="Shared Image" />
+            <meta property="og:title" content=" " />
             <meta property="og:description" content="This image was uploaded via Discord." />
             <meta property="og:image" content="{full_image_url}" />
             <meta property="og:type" content="website" />
             <meta property="og:url" content="{request.url}" />
             <meta name="twitter:card" content="summary_large_image" />
-            <meta name="twitter:title" content="Shared Image" />
+            <meta name="twitter:title" content=" " />
             <meta name="twitter:description" content="This image was uploaded via Discord." />
             <meta name="twitter:image" content="{full_image_url}" />
         </head>
