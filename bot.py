@@ -81,7 +81,7 @@ async def on_message(message):
         await message.channel.send(f"한 {len(deleted)} 마디 정도 지운 것 같은데. 작작 쓰세요.")
         return
 
-    # 다른 메시지 처리 (이미지 업로드)
+    # 이미지 업로드 처리
     if message.attachments:
         for attachment in message.attachments:
             if attachment.content_type and attachment.content_type.startswith('image/'):
@@ -92,6 +92,7 @@ async def on_message(message):
                 page_url = f"https://{os.getenv('RAILWAY_STATIC_URL')}/image?full_url={encoded_url}"
                 logging.info(f"Generated Page URL: {page_url}")
                 await message.channel.send(f"이런 것도 혼자 못 하시나요...: {page_url}")
+
 
 # Discord 봇 실행
 def run_discord_bot():
