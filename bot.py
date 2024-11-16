@@ -73,7 +73,7 @@ async def on_message(message):
                 encoded_url = urllib.parse.quote(attachment.url, safe='')
                 page_url = f"https://{os.getenv('RAILWAY_STATIC_URL')}/image?full_url={encoded_url}"
                 logging.info(f"Generated Page URL: {page_url}")
-                await message.channel.send(f"Here's your preview link: {page_url}")
+                await message.channel.send(f"이런 것도 혼자 못 하시나요...: {page_url}")
 
 # Discord 봇 실행
 def run_discord_bot():
