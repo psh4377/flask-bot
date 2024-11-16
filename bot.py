@@ -56,8 +56,18 @@ async def on_message(message):
 
 # Discord 봇 실행
 def run_discord_bot():
-    TOKEN = os.getenv("DISCORD_TOKEN")
-    if not TOKEN:
-        print("ERROR: DISCORD_TOKEN environment variable is not set.")
-        return
-    print(f"DISCORD_TOKEN successfully retrieved: {TOKEN[:10]}...")  # 토큰 일부만 출력 (보안
+    try:
+        TOKEN = os.getenv("DISCORD_TOKEN")
+        if not TOKEN:
+            raise ValueError("ERROR: DISCORD_TOKEN environment variable is not set or empty.")
+        print(f"DISCORD_TOKEN successfully retrieved: {TOKEN[:10]}...")  # 토큰 일부만 출력 (보안)
+        client.run(TOKEN)
+    except Exception as e:
+        print(f"Error while running Discord bot: {e}")
+
+if __name__ == "__main__":
+    # 디스코드 봇 비동기 실행
+    threading.Thread(target=run_discord_bot, daemon=True).start()
+    # Flask 서버 실행
+    print("Starting Flask server...")
+    app.run(host="0.0.0.0", port=8080)
