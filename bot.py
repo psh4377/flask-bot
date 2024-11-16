@@ -15,31 +15,43 @@ app = Flask(__name__)
 
 @app.route('/image')
 def image_page():
-    encoded_image_url = request.args.get('full_url', '').strip()
-    full_image_url = urllib.parse.unquote(encoded_image_url)
-    logging.info(f"Full image URL received: {full_image_url}")
+    try:
+        # 요청받은 URL을 가져옵니다
+        encoded_image_url = request.args.get('full_url', '').strip()
+        logging.info(f"Encoded image URL received: {encoded_image_url}")
 
-    html_template = f"""
-    <html>
-    <head>
-        <meta charset="utf-8">
-        <meta property="og:title" content="Shared Image" />
-        <meta property="og:description" content="This image was uploaded via Discord." />
-        <meta property="og:image" content="{full_image_url}" />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="{request.url}" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Shared Image" />
-        <meta name="twitter:description" content="This image was uploaded via Discord." />
-        <meta name="twitter:image" content="{full_image_url}" />
-    </head>
-    <body>
-        <h1>Shared Image</h1>
-        <img src="{full_image_url}" alt="Shared Image" />
-    </body>
-    </html>
-    """
-    return html_template
+        # URL을 디코딩합니다
+        full_image_url = urllib.parse.unquote(encoded_image_url)
+        logging.info(f"Full image URL after decoding: {full_image_url}")
+
+        # HTML 템플릿 생성
+        html_template = f"""
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <meta property="og:title" content="Shared Image" />
+            <meta property="og:description" content="This image was uploaded via Discord." />
+            <meta property="og:image" content="{full_image_url}" />
+            <meta property="og:type" content="website" />
+            <meta property="og:url" content="{request.url}" />
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:title" content="Shared Image" />
+            <meta name="twitter:description" content="This image was uploaded via Discord." />
+            <meta name="twitter:image" content="{full_image_url}" />
+        </head>
+        <body>
+            <h1>Shared Image</h1>
+            <img src="{full_image_url}" alt="Shared Image" />
+        </body>
+        </html>
+        """
+        logging.info("HTML template successfully generated.")
+        return html_template
+    except Exception as e:
+        # 예외 발생 시 로그 출력 및 500 에러 반환
+        logging.error(f"Error in /image route: {e}")
+        return "An error occurred while processing your request.", 500
+
 
 # Discord 봇 설정
 intents = discord.Intents.default()
