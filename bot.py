@@ -26,18 +26,17 @@ def image_page():
         return "Error", 500
 
 ytdl_format_options = {
-    'format': 'bestaudio[ext=m4a]/bestaudio',
-    'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '256'}],
-    'noplaylist': True,
+    'format': 'bestaudio/best',
     'quiet': True,
     'no_warnings': True,
-    'default_search': 'ytsearch',
-    'source_address': '0.0.0.0',
+    'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '256'}],
+    'source_address': '0.0.0.0'  # IPv6 연결 문제 방지
 }
+
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
 ffmpeg_options = {
-    'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 -bufsize 64M -probesize 20M -analyzeduration 30M',
+    'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
     'options': '-vn -b:a 256k'
 }
 
@@ -59,10 +58,10 @@ async def play(ctx, url):
     if ctx.voice_client is None:
         await channel.connect()
 
-    vc = ctx.voice_client
-    if not vc.is_connected():
-        await vc.disconnect()
-        await channel.connect()
+    vc = ctx.voice_client  # voice_client 객체 캐싱
+
+    if vc.is_playing():  # 현재 재생 중인 오디오가 있다면 정지
+        vc.stop()
 
     try:
         # 유튜브에서 스트리밍 URL 가져오기
@@ -74,12 +73,12 @@ async def play(ctx, url):
 
         # FFmpeg로 오디오 스트림 재생
         audio_source = discord.FFmpegPCMAudio(data['url'], **ffmpeg_options)
-        vc.play(audio_source, after=lambda e: asyncio.run_coroutine_threadsafe(
-            ctx.send("오류 발생! 재시도 중..."), bot.loop) if e else None)
+        vc.play(audio_source, after=lambda e: print(f"Player error: {e}") if e else None)
         await ctx.send(f"재생 중: {data['title']}")
     except Exception as e:
         await ctx.send(f"재생 중 오류 발생: {e}")
         logging.error(f"Error during playback: {e}")
+
 
 # Discord 봇 및 Flask 서버 실행
 def run_discord_bot():
