@@ -26,19 +26,22 @@ def image_page():
         return "Error", 500
 
 ytdl_format_options = {
-    'format': 'bestaudio[ext=m4a]/bestaudio',
-    'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '320'}],
-    'noplaylist': True,
+    'format': 'bestaudio/best',
+    'postprocessors': [{
+        'key': 'FFmpegExtractAudio',
+        'preferredcodec': 'mp3',
+        'preferredquality': '192',
+    }],
     'quiet': True,
     'no_warnings': True,
-    'source_address': '0.0.0.0'  # IPv6 연결 문제 방지
+    'outtmpl': '/tmp/audio/%(title)s.%(ext)s',
 }
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
 ffmpeg_options = {
     'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
-    'options': '-vn -af "aresample=async=1:min_hard_comp=0.100000:first_pts=0:dither_method=shibata" -b:a 320k'
+    'options': '-vn -b:a 192k -af "aresample=async=1:min_hard_comp=0.100000:first_pts=0"'
 }
 
 intents = discord.Intents.default()
@@ -48,6 +51,23 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 @bot.event
 async def on_ready():
     logging.info(f"Logged in as {bot.user}")
+async def on_message(message):
+    if message.author == bot.user:
+        return
+
+    # '!image' 명령어 처리
+    if message.content.startswith('!image'):
+        if message.attachments:
+            for attachment in message.attachments:
+                if attachment.content_type and attachment.content_type.startswith('image/'):
+                    encoded_url = urllib.parse.quote(attachment.url, safe='')
+                    page_url = f"https://{os.getenv('RAILWAY_STATIC_URL')}/image?full_url={encoded_url}"
+                    await message.channel.send(f"이런 것도 혼자 못 하시나요...: {page_url}")
+        else:
+            await message.channel.send("이미지가 없잖아요. 사진 올리는 거 잊었어요?")
+        return
+
+    await bot.process_commands(message)
 
 @bot.command(name='play', help='유튜브 링크의 오디오를 재생합니다.')
 async def play(ctx, url):
@@ -65,11 +85,14 @@ async def play(ctx, url):
 
     try:
         loop = asyncio.get_event_loop()
-        # 유튜브 오디오를 다운로드하여 로컬 파일로 저장
         data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=True))
         audio_file = ytdl.prepare_filename(data)
 
-        # 로컬 파일로 스트리밍
+        if not os.path.exists(audio_file):
+            await ctx.send("오디오 파일을 찾을 수 없습니다. 다시 시도하세요.")
+            return
+
+        # FFmpeg를 사용하여 로컬 파일 스트리밍
         audio_source = discord.FFmpegPCMAudio(audio_file, **ffmpeg_options)
         vc.play(audio_source, after=lambda e: logging.error(f"Player error: {e}") if e else None)
         await ctx.send(f"재생 중: {data['title']}")
