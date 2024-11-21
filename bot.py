@@ -25,6 +25,7 @@ def image_page():
         logging.error(f"Error in /image route: {e}")
         return "Error", 500
 
+# yt-dlp 및 FFmpeg 옵션
 ytdl_format_options = {
     'format': 'bestaudio/best',
     'postprocessors': [{
@@ -44,6 +45,7 @@ ffmpeg_options = {
     'options': '-vn -b:a 192k -af "aresample=async=1:min_hard_comp=0.100000:first_pts=0"'
 }
 
+# Discord 봇 설정
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
@@ -51,6 +53,8 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 @bot.event
 async def on_ready():
     logging.info(f"Logged in as {bot.user}")
+
+@bot.event
 async def on_message(message):
     if message.author == bot.user:
         return
@@ -69,7 +73,7 @@ async def on_message(message):
 
     await bot.process_commands(message)
 
-@bot.command(name='play', help='유튜브 링크의 오디오를 재생합니다.')
+@bot.command(name='play', help='유튜브 링크의 오디오를 다운로드 후 재생합니다.')
 async def play(ctx, url):
     if not ctx.author.voice:
         await ctx.send("먼저 음성 채널에 들어가야 합니다!")
@@ -92,7 +96,7 @@ async def play(ctx, url):
             await ctx.send("오디오 파일을 찾을 수 없습니다. 다시 시도하세요.")
             return
 
-        # FFmpeg를 사용하여 로컬 파일 스트리밍
+        # 다운로드된 파일을 FFmpeg로 재생
         audio_source = discord.FFmpegPCMAudio(audio_file, **ffmpeg_options)
         vc.play(audio_source, after=lambda e: logging.error(f"Player error: {e}") if e else None)
         await ctx.send(f"재생 중: {data['title']}")
@@ -100,26 +104,23 @@ async def play(ctx, url):
         await ctx.send(f"재생 중 오류 발생: {e}")
         logging.error(f"Error during playback: {e}")
 
+
 @bot.command(name='clear', help='지정된 수의 메시지를 삭제합니다.')
 async def clear(ctx, count: int = 100):
     try:
-        # 입력 값 검증
         if count <= 0 or count > 1000:
             await ctx.send("천 개까지만 지워드려요.")
             return
 
-        # 메시지 삭제 권한 확인
         if not ctx.channel.permissions_for(ctx.author).manage_messages:
             await ctx.send("권한이 없다고 하네요. 카드는 주고 일하라 하셔야죠…")
             return
 
-        # 메시지 삭제 작업 시작
         deleted = await ctx.channel.purge(limit=count)
         await ctx.send(f"한 {len(deleted)} 마디 정도 지운 것 같은데. 작작 쓰세요.")
     except Exception as e:
         await ctx.send(f"명령 처리 중 오류가 발생했습니다: {e}")
         logging.error(f"Error in !clear command: {e}")
-
 
 # Discord 봇 및 Flask 서버 실행
 def run_discord_bot():
