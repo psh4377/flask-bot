@@ -26,10 +26,11 @@ def image_page():
         return "Error", 500
 
 ytdl_format_options = {
-    'format': 'bestaudio/best',
+    'format': 'bestaudio[ext=m4a]/bestaudio',
+    'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '320'}],
+    'noplaylist': True,
     'quiet': True,
     'no_warnings': True,
-    'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '256'}],
     'source_address': '0.0.0.0'  # IPv6 연결 문제 방지
 }
 
@@ -37,7 +38,7 @@ ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
 ffmpeg_options = {
     'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
-    'options': '-vn -b:a 256k'
+    'options': '-vn -af "aresample=async=1:min_hard_comp=0.100000:first_pts=0" -b:a 192k'
 }
 
 intents = discord.Intents.default()
@@ -58,22 +59,19 @@ async def play(ctx, url):
     if ctx.voice_client is None:
         await channel.connect()
 
-    vc = ctx.voice_client  # voice_client 객체 캐싱
-
-    if vc.is_playing():  # 현재 재생 중인 오디오가 있다면 정지
+    vc = ctx.voice_client
+    if vc.is_playing():
         vc.stop()
 
     try:
-        # 유튜브에서 스트리밍 URL 가져오기
         loop = asyncio.get_event_loop()
         data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
         if 'url' not in data:
             await ctx.send("스트리밍 URL을 가져오지 못했습니다. 다시 시도하세요.")
             return
 
-        # FFmpeg로 오디오 스트림 재생
         audio_source = discord.FFmpegPCMAudio(data['url'], **ffmpeg_options)
-        vc.play(audio_source, after=lambda e: print(f"Player error: {e}") if e else None)
+        vc.play(audio_source, after=lambda e: logging.error(f"Player error: {e}") if e else None)
         await ctx.send(f"재생 중: {data['title']}")
     except Exception as e:
         await ctx.send(f"재생 중 오류 발생: {e}")
