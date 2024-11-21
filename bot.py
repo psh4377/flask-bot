@@ -88,14 +88,25 @@ ytdl_format_options = {
     }],
     'quiet': True,
     'no_warnings': True,
+}import youtube_dl  # yt-dlp를 사용하는 경우, yt_dlp로 변경
+
+# 유튜브 다운로드 옵션
+ytdl_format_options = {
+    'format': 'bestaudio/best',
+    'postprocessors': [{
+        'key': 'FFmpegExtractAudio',
+        'preferredcodec': 'mp3',
+        'preferredquality': '256',  # 오디오 품질
+    }],
+    'quiet': True,
+    'no_warnings': True,
 }
+ytdl = youtube_dl.YoutubeDL(ytdl_format_options)  # youtube_dl 객체 초기화
 
 ffmpeg_options = {
-    'options': '-vn -b:a 256k'  # 스트리밍 품질 256kbps
+    'options': '-vn -b:a 256k'  # FFmpeg 스트리밍 옵션
 }
 
-
-# !play 명령어
 @bot.command(name='play', help='유튜브 링크의 오디오를 재생합니다.')
 async def play(ctx, url):
     if not ctx.author.voice:
@@ -103,7 +114,6 @@ async def play(ctx, url):
         return
 
     channel = ctx.author.voice.channel
-
     if ctx.voice_client is None:
         await channel.connect()
 
@@ -112,7 +122,7 @@ async def play(ctx, url):
         loop = asyncio.get_event_loop()
         data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
         audio_source = discord.FFmpegPCMAudio(data['url'], **ffmpeg_options)
-        vc.play(audio_source, after=lambda e: logging.error(f"Player error: {e}") if e else None)
+        vc.play(audio_source, after=lambda e: print(f"Player error: {e}") if e else None)
         await ctx.send(f"재생 중: {data['title']}")
     except Exception as e:
         await ctx.send(f"재생 중 오류 발생: {e}")
