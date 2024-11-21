@@ -65,13 +65,21 @@ async def play(ctx, url):
         await channel.connect()
 
     try:
+        # 유튜브에서 스트리밍 URL 가져오기
         loop = asyncio.get_event_loop()
         data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
+        if 'url' not in data:
+            await ctx.send("스트리밍 URL을 가져오지 못했습니다. 다시 시도하세요.")
+            return
+
+        # FFmpeg로 오디오 스트림 재생
         audio_source = discord.FFmpegPCMAudio(data['url'], **ffmpeg_options)
-        vc.play(audio_source, after=lambda e: asyncio.run_coroutine_threadsafe(ctx.send("오류 발생! 재시도 중..."), bot.loop) if e else None)
+        vc.play(audio_source, after=lambda e: asyncio.run_coroutine_threadsafe(
+            ctx.send("오류 발생! 재시도 중..."), bot.loop) if e else None)
         await ctx.send(f"재생 중: {data['title']}")
     except Exception as e:
         await ctx.send(f"재생 중 오류 발생: {e}")
+        logging.error(f"Error during playback: {e}")
 
 # Discord 봇 및 Flask 서버 실행
 def run_discord_bot():
