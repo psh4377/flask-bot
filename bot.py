@@ -69,30 +69,44 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    # '!clear' 명령어 처리
-    if message.content.startswith('!clear'):
-        # 채널 권한 확인
-        if not message.channel.permissions_for(message.author).manage_messages:
-            await message.channel.send("권한이 없다고 하네요. 카드는 주고 일하라 하셔야죠…")
-            return
-
-        # 메시지 삭제 작업 시작
-        await message.channel.send("지우는 중이니까 좀 기다려요.")
-        deleted = await message.channel.purge(limit=100)  # 최근 100개의 메시지 삭제
-        await message.channel.send(f"한 {len(deleted)} 마디 정도 지운 것 같은데. 작작 쓰세요.")
+    # '!image' 명령어와 함께 업로드된 이미지 처리
+    if message.content.startswith('!image'):
+        if message.attachments:
+            for attachment in message.attachments:
+                if attachment.content_type and attachment.content_type.startswith('image/'):
+                    logging.info(f"Initial Attachment URL: {attachment.url}")
+                    await asyncio.sleep(5)  # 링크 안정화 시간 대기
+                    logging.info(f"Final Attachment URL after wait: {attachment.url}")
+                    encoded_url = urllib.parse.quote(attachment.url, safe='')
+                    page_url = f"https://{os.getenv('RAILWAY_STATIC_URL')}/image?full_url={encoded_url}"
+                    logging.info(f"Generated Page URL: {page_url}")
+                    await message.channel.send(f"이런 것도 혼자 못 하시나요...: {page_url}")
+        else:
+            # 이미지 없이 명령어만 입력한 경우
+            await message.channel.send("이미지가 없잖아요. 사진 올리는 거 잊었어요?")
         return
 
-    # 이미지 업로드 처리
-    if message.attachments:
-        for attachment in message.attachments:
-            if attachment.content_type and attachment.content_type.startswith('image/'):
-                logging.info(f"Initial Attachment URL: {attachment.url}")
-                await asyncio.sleep(5)
-                logging.info(f"Final Attachment URL after wait: {attachment.url}")
-                encoded_url = urllib.parse.quote(attachment.url, safe='')
-                page_url = f"https://{os.getenv('RAILWAY_STATIC_URL')}/image?full_url={encoded_url}"
-                logging.info(f"Generated Page URL: {page_url}")
-                await message.channel.send(f"이런 것도 혼자 못 하시나요...: {page_url}")
+    # '!clear' 명령어 처리
+    if message.content.startswith('!clear'):
+        try:
+            args = message.content.split()
+            limit = int(args[1]) if len(args) > 1 else 100
+
+            if limit <= 0 or limit > 1000:
+                await message.channel.send("천 개 까지만 해줄 거예요.")
+                return
+
+            if not message.channel.permissions_for(message.author).manage_messages:
+                await message.channel.send("권한이 없다고 하네요. 카드는 주고 일하라 하셔야죠…")
+                return
+
+            await message.channel.send(f"지우는 중이니까 좀 기다려요. ({limit}개 메시지)")
+            deleted = await message.channel.purge(limit=limit)
+            await message.channel.send(f"한 {len(deleted)} 마디 정도 지운 것 같은데. 작작 쓰세요.")
+        except (IndexError, ValueError):
+            await message.channel.send("지워달라고 할 거면 이렇게 써요. : `!clear [삭제할 메시지 수]`")
+        return
+
 
 
 # Discord 봇 실행
