@@ -28,20 +28,17 @@ def image_page():
 # 유튜브 다운로드 옵션
 ytdl_format_options = {
     'format': 'bestaudio[ext=webm]/bestaudio[ext=m4a]/bestaudio/best',
-    'postprocessors': [{
-        'key': 'FFmpegExtractAudio',
-        'preferredcodec': 'mp3',
-        'preferredquality': '256',
-    }],
+    'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '256'}],
     'quiet': True,
     'no_warnings': True,
 }
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
+
+# FFmpeg 스트리밍 옵션
 ffmpeg_options = {
     'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 -probesize 10M -analyzeduration 20M',
     'options': '-vn -b:a 256k'
 }
-
 
 # Discord 봇 설정
 intents = discord.Intents.default()
@@ -52,36 +49,6 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 @bot.event
 async def on_ready():
     logging.info(f"Logged in as {bot.user}")
-
-@bot.event
-async def on_message(message):
-    if message.author == bot.user:
-        return
-
-    if message.content.startswith('!image'):
-        if message.attachments:
-            for attachment in message.attachments:
-                if attachment.content_type and attachment.content_type.startswith('image/'):
-                    encoded_url = urllib.parse.quote(attachment.url, safe='')
-                    page_url = f"https://{os.getenv('RAILWAY_STATIC_URL')}/image?full_url={encoded_url}"
-                    await message.channel.send(f"이런 것도 혼자 못 하시나요...: {page_url}")
-        else:
-            await message.channel.send("이미지가 없잖아요. 사진 올리는 거 잊었어요?")
-        return
-
-    await bot.process_commands(message)
-
-@bot.command(name='clear', help='지정된 수의 메시지를 삭제합니다.')
-async def clear(ctx, count: int = 100):
-    if count <= 0 or count > 1000:
-        await ctx.send("천 개까지만 지워드려요.")
-        return
-    if not ctx.channel.permissions_for(ctx.author).manage_messages:
-        await ctx.send("권한이 없다고 하네요. 카드는 주고 일하라 하셔야죠…")
-        return
-
-    deleted = await ctx.channel.purge(limit=count)
-    await ctx.send(f"한 {len(deleted)} 마디 정도 지운 것 같은데. 작작 쓰세요.")
 
 @bot.command(name='play', help='유튜브 링크의 오디오를 재생합니다.')
 async def play(ctx, url):
