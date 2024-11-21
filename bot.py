@@ -25,6 +25,10 @@ def image_page():
         logging.error(f"Error in /image route: {e}")
         return "Error", 500
 
+# 다운로드 디렉토리 설정
+DOWNLOAD_DIR = "/tmp/audio"
+os.makedirs(DOWNLOAD_DIR, exist_ok=True)  # 디렉토리 생성
+
 # yt-dlp 및 FFmpeg 옵션
 ytdl_format_options = {
     'format': 'bestaudio/best',
@@ -35,7 +39,7 @@ ytdl_format_options = {
     }],
     'quiet': True,
     'no_warnings': True,
-    'outtmpl': '/tmp/audio/%(title)s.%(ext)s',
+    'outtmpl': f'{DOWNLOAD_DIR}/%(title)s.%(ext)s',
 }
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
