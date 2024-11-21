@@ -25,28 +25,17 @@ def image_page():
         logging.error(f"Error in /image route: {e}")
         return "Error", 500
 
-# 다운로드 디렉토리 설정
-DOWNLOAD_DIR = "/tmp/audio"
-os.makedirs(DOWNLOAD_DIR, exist_ok=True)  # 오디오 파일 저장 디렉토리 생성
-
-# yt-dlp 옵션에서 다운로드 경로 지정
+# yt-dlp 및 FFmpeg 옵션 설정
 ytdl_format_options = {
     'format': 'bestaudio/best',
-    'postprocessors': [{
-        'key': 'FFmpegExtractAudio',
-        'preferredcodec': 'mp3',
-        'preferredquality': '192',
-    }],
     'quiet': True,
     'no_warnings': True,
-    'outtmpl': f'{DOWNLOAD_DIR}/%(title)s.%(ext)s',  # 다운로드 디렉토리 사용
 }
-
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
 ffmpeg_options = {
-    'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
-    'options': '-vn -b:a 192k -af "aresample=async=1:min_hard_comp=0.100000:first_pts=0"'
+    'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 -probesize 10M -analyzeduration 30M',
+    'options': '-vn -b:a 320k -af "aresample=async=1:min_hard_comp=0.100:first_pts=0"'
 }
 
 # Discord 봇 설정
@@ -77,7 +66,7 @@ async def on_message(message):
 
     await bot.process_commands(message)
 
-@bot.command(name='play', help='유튜브 링크의 오디오를 다운로드 후 재생합니다.')
+@bot.command(name='play', help='유튜브 링크의 오디오를 스트리밍합니다.')
 async def play(ctx, url):
     if not ctx.author.voice:
         await ctx.send("먼저 음성 채널에 들어가야 합니다!")
@@ -92,22 +81,18 @@ async def play(ctx, url):
         vc.stop()
 
     try:
+        # 유튜브 링크에서 오디오 정보 가져오기
         loop = asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=True))
-        audio_file = ytdl.prepare_filename(data)
+        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
+        audio_url = data['url']
 
-        if not os.path.exists(audio_file):
-            await ctx.send("오디오 파일을 찾을 수 없습니다. 다시 시도하세요.")
-            return
-
-        # 다운로드된 파일을 FFmpeg로 재생
-        audio_source = discord.FFmpegPCMAudio(audio_file, **ffmpeg_options)
+        # FFmpeg 스트리밍
+        audio_source = discord.FFmpegPCMAudio(audio_url, **ffmpeg_options)
         vc.play(audio_source, after=lambda e: logging.error(f"Player error: {e}") if e else None)
         await ctx.send(f"재생 중: {data['title']}")
     except Exception as e:
         await ctx.send(f"재생 중 오류 발생: {e}")
         logging.error(f"Error during playback: {e}")
-
 
 @bot.command(name='clear', help='지정된 수의 메시지를 삭제합니다.')
 async def clear(ctx, count: int = 100):
@@ -125,6 +110,22 @@ async def clear(ctx, count: int = 100):
     except Exception as e:
         await ctx.send(f"명령 처리 중 오류가 발생했습니다: {e}")
         logging.error(f"Error in !clear command: {e}")
+
+@bot.command(name='stop', help='현재 재생 중인 음악을 멈춥니다.')
+async def stop(ctx):
+    if ctx.voice_client and ctx.voice_client.is_playing():
+        ctx.voice_client.stop()
+        await ctx.send("음악 재생을 멈췄습니다.")
+    else:
+        await ctx.send("현재 재생 중인 음악이 없습니다.")
+
+@bot.command(name='leave', help='봇이 음성 채널을 떠납니다.')
+async def leave(ctx):
+    if ctx.voice_client:
+        await ctx.voice_client.disconnect()
+        await ctx.send("음성 채널에서 나갔습니다.")
+    else:
+        await ctx.send("봇이 음성 채널에 연결되어 있지 않습니다.")
 
 # Discord 봇 및 Flask 서버 실행
 def run_discord_bot():
