@@ -28,18 +28,25 @@ def image_page():
 # yt-dlp 및 FFmpeg 옵션 설정
 ytdl_format_options = {
     'format': 'bestaudio/best',
+    'postprocessors': [{
+        'key': 'FFmpegExtractAudio',
+        'preferredcodec': 'opus',
+        'preferredquality': '0',  # 무손실 품질
+    }],
     'quiet': True,
     'no_warnings': True,
 }
+
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
 ffmpeg_options = {
     'before_options': (
         '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 '
-        '-bufsize 64M -probesize 32M -analyzeduration 60M'
+        '-probesize 64M -analyzeduration 120M'
     ),
     'options': (
-        '-vn -b:a 128k -af "aresample=async=1:min_hard_comp=0.100:first_pts=0"'
+        '-vn -b:a 320k -bufsize 128M '
+        '-af "aresample=async=1:min_hard_comp=0.100:first_pts=0"'
     ),
 }
 
