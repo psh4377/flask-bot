@@ -73,42 +73,6 @@ async def on_message(message):
 
     await bot.process_commands(message)
 
-@bot.command(name='play', help='유튜브 링크의 오디오를 스트리밍합니다.')
-async def play(ctx, url):
-    if not ctx.author.voice:
-        await ctx.send("먼저 음성 채널에 들어가야 합니다!")
-        return
-
-    channel = ctx.author.voice.channel
-    if ctx.voice_client is None:
-        await channel.connect()
-
-    vc = ctx.voice_client
-    if vc.is_playing():
-        vc.stop()
-
-    try:
-        # 유튜브 링크에서 오디오 정보 가져오기
-        loop = asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
-        audio_url = data['url']
-
-        # FFmpeg 스트리밍
-        audio_source = discord.FFmpegPCMAudio(audio_url, **ffmpeg_options)
-        vc.play(audio_source, after=lambda e: logging.error(f"Player error: {e}") if e else None)
-        await ctx.send(f"재생 중: {data['title']}")
-    except Exception as e:
-        await ctx.send(f"재생 중 오류 발생: {e}")
-        logging.error(f"Error during playback: {e}")
-
-@bot.command(name='stop', help='현재 재생 중인 음악을 멈춥니다.')
-async def stop(ctx):
-    if ctx.voice_client and ctx.voice_client.is_playing():
-        ctx.voice_client.stop()
-        await ctx.send("음악 재생을 멈췄습니다.")
-    else:
-        await ctx.send("현재 재생 중인 음악이 없습니다.")
-
 @bot.command(name='clear', help='지정된 수의 메시지를 삭제합니다.')
 async def clear(ctx, count: int = 100):
     try:
