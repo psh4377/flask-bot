@@ -1,18 +1,25 @@
-# Python 3.13 slim 이미지를 기반으로 컨테이너 생성
-FROM python:3.13-slim
+# Python과 Node.js를 함께 사용하는 다중 단계 빌드 Dockerfile 예제
 
-# 작업 디렉토리 설정
+# Node.js 환경 추가
+FROM node:18 as node-builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+
+# Python 환경 추가
+FROM python:3.13-slim
 WORKDIR /app
 
-# 필수 패키지 설치
-RUN apt-get update && apt-get install -y ffmpeg && apt-get clean
-
-# 의존성 파일 복사 및 설치
+# Python 의존성 설치
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 소스 코드 복사
+# Node.js 파일 복사
+COPY --from=node-builder /app/node_modules ./node_modules
+COPY --from=node-builder /app/package.json .
+
+# Python 파일 복사
 COPY . .
 
-# 컨테이너 실행 명령어
-CMD ["python", "bot.py"]
+# Node.js와 Python 프로젝트 실행
+CMD ["bash", "-c", "python bot.py & node index.js"]
