@@ -8,6 +8,13 @@ import threading
 import logging
 import youtube_dl
 import yt_dlp as youtube_dl
+import os
+import subprocess
+try:
+    import yt_dlp
+except ImportError:
+    subprocess.check_call(["pip", "install", "yt-dlp"])
+    import yt_dlp
 
 # 로깅 설정
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(levelname)s] %(message)s")
