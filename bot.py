@@ -80,14 +80,20 @@ async def clear(ctx, count: int = 100):
 
 # 유튜브 다운로드 옵션
 ytdl_format_options = {
-    'format': 'bestaudio/best',
-    'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '192'}],
+    'format': 'bestaudio[ext=webm]/bestaudio[ext=m4a]/bestaudio/best',
+    'postprocessors': [{
+        'key': 'FFmpegExtractAudio',
+        'preferredcodec': 'mp3',
+        'preferredquality': '256',  # 오디오 품질 256kbps
+    }],
     'quiet': True,
-    'no_warnings': True
+    'no_warnings': True,
 }
-ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
-ffmpeg_options = {'options': '-vn'}
+ffmpeg_options = {
+    'options': '-vn -b:a 256k'  # 스트리밍 품질 256kbps
+}
+
 
 # !play 명령어
 @bot.command(name='play', help='유튜브 링크의 오디오를 재생합니다.')
