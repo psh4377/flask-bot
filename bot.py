@@ -25,27 +25,26 @@ def image_page():
         logging.error(f"Error in /image route: {e}")
         return "Error", 500
 
-# 유튜브 다운로드 옵션
 ytdl_format_options = {
-    'format': 'bestaudio[ext=webm]/bestaudio[ext=m4a]/bestaudio/best',
+    'format': 'bestaudio[ext=m4a]/bestaudio',
     'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '256'}],
+    'noplaylist': True,
     'quiet': True,
     'no_warnings': True,
+    'default_search': 'ytsearch',
+    'source_address': '0.0.0.0',
 }
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
-# FFmpeg 스트리밍 옵션
 ffmpeg_options = {
-    'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 -probesize 10M -analyzeduration 20M',
+    'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 -bufsize 64M -probesize 20M -analyzeduration 30M',
     'options': '-vn -b:a 256k'
 }
 
-# Discord 봇 설정
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# 봇 이벤트 및 명령어
 @bot.event
 async def on_ready():
     logging.info(f"Logged in as {bot.user}")
@@ -62,33 +61,17 @@ async def play(ctx, url):
 
     vc = ctx.voice_client
     if not vc.is_connected():
-        await ctx.voice_client.disconnect()
+        await vc.disconnect()
         await channel.connect()
 
     try:
         loop = asyncio.get_event_loop()
         data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
         audio_source = discord.FFmpegPCMAudio(data['url'], **ffmpeg_options)
-        vc.play(audio_source, after=lambda e: print(f"Player error: {e}") if e else None)
+        vc.play(audio_source, after=lambda e: asyncio.run_coroutine_threadsafe(ctx.send("오류 발생! 재시도 중..."), bot.loop) if e else None)
         await ctx.send(f"재생 중: {data['title']}")
     except Exception as e:
         await ctx.send(f"재생 중 오류 발생: {e}")
-
-@bot.command(name='stop', help='현재 재생 중인 음악을 멈춥니다.')
-async def stop(ctx):
-    if ctx.voice_client and ctx.voice_client.is_playing():
-        ctx.voice_client.stop()
-        await ctx.send("음악 재생을 멈췄습니다.")
-    else:
-        await ctx.send("현재 재생 중인 음악이 없습니다.")
-
-@bot.command(name='leave', help='봇이 음성 채널을 떠납니다.')
-async def leave(ctx):
-    if ctx.voice_client:
-        await ctx.voice_client.disconnect()
-        await ctx.send("음성 채널에서 나갔습니다.")
-    else:
-        await ctx.send("봇이 음성 채널에 연결되어 있지 않습니다.")
 
 # Discord 봇 및 Flask 서버 실행
 def run_discord_bot():
