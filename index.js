@@ -10,7 +10,7 @@ const client = new Client({
 });
 
 // Discord 토큰
-const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
+const DISCORD_TOKEN = process.env.DISCORD_TOKEN_NODE;
 
 // 봇 준비
 client.once('ready', () => {

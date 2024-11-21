@@ -1,4 +1,5 @@
 import os
+DISCORD_TOKEN = os.getenv("DISCORD_TOKEN_PYTHON")
 import discord
 from discord.ext import commands
 from flask import Flask, request
