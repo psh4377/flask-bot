@@ -10,12 +10,11 @@ RUN npm install
 FROM python:3.13-slim
 WORKDIR /app
 
-# Python 종속성 설치
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Python 및 Node.js 소스 복사
+COPY . .
 
-# Node.js 빌드 결과 및 Python 소스 복사
-COPY --from=node-builder /app /app
+# Python 종속성 설치
+RUN pip install --no-cache-dir -r requirements.txt
 
 # 시작 명령어 설정
 CMD ["sh", "-c", "node index.js & python bot.py"]
