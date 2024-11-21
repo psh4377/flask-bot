@@ -27,9 +27,9 @@ def image_page():
 
 # 다운로드 디렉토리 설정
 DOWNLOAD_DIR = "/tmp/audio"
-os.makedirs(DOWNLOAD_DIR, exist_ok=True)  # 디렉토리 생성
+os.makedirs(DOWNLOAD_DIR, exist_ok=True)  # 오디오 파일 저장 디렉토리 생성
 
-# yt-dlp 및 FFmpeg 옵션
+# yt-dlp 옵션에서 다운로드 경로 지정
 ytdl_format_options = {
     'format': 'bestaudio/best',
     'postprocessors': [{
@@ -39,7 +39,7 @@ ytdl_format_options = {
     }],
     'quiet': True,
     'no_warnings': True,
-    'outtmpl': f'{DOWNLOAD_DIR}/%(title)s.%(ext)s',  # 다운로드 디렉토리 설정
+    'outtmpl': f'{DOWNLOAD_DIR}/%(title)s.%(ext)s',  # 다운로드 디렉토리 사용
 }
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)

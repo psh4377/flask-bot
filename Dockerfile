@@ -5,6 +5,6 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
-CMD ["python", "bot.py"]
+CMD ["python", "bot.py", "/app/bot.py"]
 RUN mkdir -p /tmp/audio && chmod -R 777 /tmp/audio
 WORKDIR /tmp/audio
