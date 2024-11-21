@@ -36,11 +36,10 @@ ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 ffmpeg_options = {
     'before_options': (
         '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 '
-        '-probesize 32M -analyzeduration 60M'
+        '-bufsize 64M -probesize 32M -analyzeduration 60M'
     ),
     'options': (
-        '-vn -b:a 320k -bufsize 64M '
-        '-af "aresample=async=1:min_hard_comp=0.100:first_pts=0"'
+        '-vn -b:a 128k -af "aresample=async=1:min_hard_comp=0.100:first_pts=0"'
     ),
 }
 
