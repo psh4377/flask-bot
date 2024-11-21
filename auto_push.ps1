@@ -2,7 +2,7 @@
 # 스크립트를 저장하고 실행하세요.
 
 # 작업 디렉토리 설정
-$WorkingDirectory = "C:\Path\To\Your\Git\Repository"  # Git 리포지토리 경로를 입력하세요.
+$WorkingDirectory = "\\172.30.1.27\DiscordBot"  # Git 리포지토리 경로를 입력하세요.
 Set-Location $WorkingDirectory
 
 # 파일 변경 감지 및 푸쉬 함수
