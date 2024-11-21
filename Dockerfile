@@ -1,8 +1,8 @@
-# Node.js 환경 설정
-FROM node:18 as node-builder
+# Node.js 설치를 위한 기본 이미지
+FROM node:18 AS node-builder
 WORKDIR /app
 
-# Node.js 패키지 설치
+# Node.js 종속성 설치
 COPY package*.json ./
 RUN npm install
 
@@ -10,12 +10,12 @@ RUN npm install
 FROM python:3.13-slim
 WORKDIR /app
 
-# Python 패키지 설치
+# Python 종속성 설치
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Node.js 및 Python 소스 복사
-COPY . .
+# Node.js 빌드 결과 및 Python 소스 복사
+COPY --from=node-builder /app /app
 
-# 실행 명령
-CMD ["bash", "-c", "python bot.py & node index.js"]
+# 시작 명령어 설정
+CMD ["sh", "-c", "node index.js & python bot.py"]
