@@ -37,7 +37,10 @@ ytdl_format_options = {
     'no_warnings': True,
 }
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
-ffmpeg_options = {'options': '-vn -b:a 256k'}
+ffmpeg_options = {
+    'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
+    'options': '-vn -b:a 256k'
+}
 
 # Discord 봇 설정
 intents = discord.Intents.default()
@@ -90,6 +93,10 @@ async def play(ctx, url):
         await channel.connect()
 
     vc = ctx.voice_client
+    if not vc.is_connected():
+        await ctx.voice_client.disconnect()
+        await channel.connect()
+
     try:
         loop = asyncio.get_event_loop()
         data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
