@@ -1,20 +1,20 @@
-# Node.js 설치를 위한 기본 이미지
-FROM node:18 AS node-builder
+# 베이스 이미지
+FROM python:3.9-slim
+
+# 필수 패키지 설치
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    && apt-get clean
+
+# 작업 디렉토리 설정
 WORKDIR /app
 
-# Node.js 종속성 설치
-COPY package*.json ./
-RUN npm install
-
-# Python 환경 설정
-FROM python:3.13-slim
-WORKDIR /app
-
-# Python 및 Node.js 소스 복사
-COPY . .
-
-# Python 종속성 설치
+# 요구사항 설치
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 시작 명령어 설정
-CMD ["sh", "-c", "node index.js & python bot.py"]
+# 소스 코드 복사
+COPY . .
+
+# 실행 명령어
+CMD ["python", "bot.py"]
