@@ -34,8 +34,14 @@ ytdl_format_options = {
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
 ffmpeg_options = {
-    'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 -probesize 32M -analyzeduration 60M',
-    'options': '-vn -b:a 320k -af "aresample=async=1:min_hard_comp=0.100:first_pts=0"'
+    'before_options': (
+        '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 '
+        '-probesize 32M -analyzeduration 60M'
+    ),
+    'options': (
+        '-vn -b:a 320k -bufsize 64M '
+        '-af "aresample=async=1:min_hard_comp=0.100:first_pts=0"'
+    ),
 }
 
 # Discord 봇 설정
@@ -94,6 +100,14 @@ async def play(ctx, url):
         await ctx.send(f"재생 중 오류 발생: {e}")
         logging.error(f"Error during playback: {e}")
 
+@bot.command(name='stop', help='현재 재생 중인 음악을 멈춥니다.')
+async def stop(ctx):
+    if ctx.voice_client and ctx.voice_client.is_playing():
+        ctx.voice_client.stop()
+        await ctx.send("음악 재생을 멈췄습니다.")
+    else:
+        await ctx.send("현재 재생 중인 음악이 없습니다.")
+
 @bot.command(name='clear', help='지정된 수의 메시지를 삭제합니다.')
 async def clear(ctx, count: int = 100):
     try:
@@ -110,14 +124,6 @@ async def clear(ctx, count: int = 100):
     except Exception as e:
         await ctx.send(f"명령 처리 중 오류가 발생했습니다: {e}")
         logging.error(f"Error in !clear command: {e}")
-
-@bot.command(name='stop', help='현재 재생 중인 음악을 멈춥니다.')
-async def stop(ctx):
-    if ctx.voice_client and ctx.voice_client.is_playing():
-        ctx.voice_client.stop()
-        await ctx.send("음악 재생을 멈췄습니다.")
-    else:
-        await ctx.send("현재 재생 중인 음악이 없습니다.")
 
 @bot.command(name='leave', help='봇이 음성 채널을 떠납니다.')
 async def leave(ctx):
