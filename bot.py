@@ -38,7 +38,7 @@ ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
 ffmpeg_options = {
     'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
-    'options': '-vn -af "aresample=async=1:min_hard_comp=0.100000:first_pts=0" -b:a 192k'
+    'options': '-vn -af "aresample=async=1:min_hard_comp=0.100000:first_pts=0:dither_method=shibata" -b:a 320k'
 }
 
 intents = discord.Intents.default()
@@ -65,18 +65,17 @@ async def play(ctx, url):
 
     try:
         loop = asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
-        if 'url' not in data:
-            await ctx.send("스트리밍 URL을 가져오지 못했습니다. 다시 시도하세요.")
-            return
+        # 유튜브 오디오를 다운로드하여 로컬 파일로 저장
+        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=True))
+        audio_file = ytdl.prepare_filename(data)
 
-        audio_source = discord.FFmpegPCMAudio(data['url'], **ffmpeg_options)
+        # 로컬 파일로 스트리밍
+        audio_source = discord.FFmpegPCMAudio(audio_file, **ffmpeg_options)
         vc.play(audio_source, after=lambda e: logging.error(f"Player error: {e}") if e else None)
         await ctx.send(f"재생 중: {data['title']}")
     except Exception as e:
         await ctx.send(f"재생 중 오류 발생: {e}")
         logging.error(f"Error during playback: {e}")
-
 
 # Discord 봇 및 Flask 서버 실행
 def run_discord_bot():
