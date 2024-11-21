@@ -39,7 +39,7 @@ ytdl_format_options = {
     }],
     'quiet': True,
     'no_warnings': True,
-    'outtmpl': f'{DOWNLOAD_DIR}/%(title)s.%(ext)s',
+    'outtmpl': f'{DOWNLOAD_DIR}/%(title)s.%(ext)s',  # 다운로드 디렉토리 설정
 }
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
