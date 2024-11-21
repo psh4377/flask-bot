@@ -6,7 +6,6 @@ import urllib.parse
 import asyncio
 import threading
 import logging
-import youtube_dl
 import yt_dlp as youtube_dl
 import os
 import subprocess
