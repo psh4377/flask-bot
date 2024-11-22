@@ -1,5 +1,5 @@
 # 베이스 이미지
-FROM python:3.9-slim
+FROM python:3.13-slim
 
 # 필수 패키지 설치
 RUN apt-get update && apt-get install -y \
