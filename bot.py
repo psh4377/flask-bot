@@ -47,7 +47,9 @@ intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN_PYTHON")
-
+if not DISCORD_TOKEN:
+    raise ValueError("Discord token is not set in environment variables!")
+    
 @bot.event
 async def on_ready():
     logging.info(f"Logged in as {bot.user}")
