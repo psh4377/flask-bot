@@ -26,6 +26,9 @@ def image_page():
     except Exception as e:
         logging.error(f"Error in /image route: {e}")
         return "Error", 500
+def debug():
+    return f"Discord Token: {os.getenv('DISCORD_TOKEN_PYTHON') or 'Not Found'}"
+
 
 # yt-dlp 및 FFmpeg 옵션 설정
 ytdl_format_options = {
