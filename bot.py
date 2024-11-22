@@ -31,19 +31,22 @@ ytdl_format_options = {
     'format': 'bestaudio/best',
     'postprocessors': [{
         'key': 'FFmpegExtractAudio',
-        'preferredcodec': 'opus',
-        'preferredquality': '0',  # 무손실 품질
+        'preferredcodec': 'mp3',
+        'preferredquality': '320',
     }],
     'quiet': True,
     'no_warnings': True,
 }
 
+
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
 ffmpeg_options = {
     'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
-    'options': '-vn -c:a libopus -b:a 128k'
+    'options': '-vn -b:a 192k -bufsize 128k'
 }
+
+
 
 
 # Discord 봇 설정
@@ -54,6 +57,12 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 @bot.event
 async def on_ready():
     logging.info(f"Logged in as {bot.user}")
+async def on_voice_state_update(member, before, after):
+    if bot.user == member:
+        vc = member.guild.voice_client
+        if vc and not vc.is_connected():
+            await vc.disconnect()
+            await after.channel.connect()
 
 @bot.event
 async def on_message(message):
