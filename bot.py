@@ -7,6 +7,7 @@ import asyncio
 import threading
 import logging
 import yt_dlp as youtube_dl
+print(f"Discord Token: {os.getenv('DISCORD_TOKEN_PYTHON')}")
 
 # 로깅 설정
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -49,7 +50,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN_PYTHON")
 if not DISCORD_TOKEN:
     raise ValueError("Discord token is not set in environment variables!")
-    
+
 @bot.event
 async def on_ready():
     logging.info(f"Logged in as {bot.user}")
