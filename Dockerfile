@@ -12,8 +12,8 @@ COPY node-bot ./
 # Python 봇 빌드
 FROM python:3.13-slim AS python-bot-stage
 
-# 필수 패키지 설치
-RUN apt-get update && apt-get install -y \
+# Dockerfile의 RUN 명령에 --no-cache 옵션 추가
+RUN apt-get update --no-cache && apt-get install -y \
     ffmpeg \
     && apt-get clean
 
