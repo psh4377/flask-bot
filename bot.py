@@ -1,5 +1,4 @@
 import os
-DISCORD_TOKEN = os.getenv("DISCORD_TOKEN_PYTHON")
 import discord
 from discord.ext import commands
 from flask import Flask, request
@@ -29,47 +28,35 @@ def image_page():
 # yt-dlp 및 FFmpeg 옵션 설정
 ytdl_format_options = {
     'format': 'bestaudio/best',
-    'postprocessors': [{
-        'key': 'FFmpegExtractAudio',
-        'preferredcodec': 'mp3',
-        'preferredquality': '320',
-    }],
     'quiet': True,
     'no_warnings': True,
 }
-
-
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
 ffmpeg_options = {
-    'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
-    'options': '-vn -b:a 192k -bufsize 128k'
+    'before_options': (
+        '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 '
+        '-probesize 32M -analyzeduration 64M'
+    ),
+    'options': '-vn -b:a 256k -af "aresample=async=1:min_hard_comp=0.1:first_pts=0" -ar 48000'
 }
-
-
-
 
 # Discord 봇 설정
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
+DISCORD_TOKEN = os.getenv("DISCORD_TOKEN_PYTHON")
+
 @bot.event
 async def on_ready():
     logging.info(f"Logged in as {bot.user}")
-async def on_voice_state_update(member, before, after):
-    if bot.user == member:
-        vc = member.guild.voice_client
-        if vc and not vc.is_connected():
-            await vc.disconnect()
-            await after.channel.connect()
 
 @bot.event
 async def on_message(message):
     if message.author == bot.user:
         return
 
-    # '!image' 명령어 처리
     if message.content.startswith('!image'):
         if message.attachments:
             for attachment in message.attachments:
@@ -98,15 +85,14 @@ async def play(ctx, url):
         vc.stop()
 
     try:
-        # 유튜브 링크에서 오디오 정보 가져오기
-        loop = asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
+        data = ytdl.extract_info(url, download=False)
         audio_url = data['url']
-
-        # FFmpeg 스트리밍
         audio_source = discord.FFmpegPCMAudio(audio_url, **ffmpeg_options)
         vc.play(audio_source, after=lambda e: logging.error(f"Player error: {e}") if e else None)
         await ctx.send(f"재생 중: {data['title']}")
+    except youtube_dl.utils.DownloadError as e:
+        await ctx.send("유효하지 않은 유튜브 링크입니다.")
+        logging.error(f"DownloadError: {e}")
     except Exception as e:
         await ctx.send(f"재생 중 오류 발생: {e}")
         logging.error(f"Error during playback: {e}")
@@ -118,7 +104,7 @@ async def stop(ctx):
         await ctx.send("음악 재생을 멈췄습니다.")
     else:
         await ctx.send("현재 재생 중인 음악이 없습니다.")
-        
+
 @bot.command(name='clear', help='지정된 수의 메시지를 삭제합니다.')
 async def clear(ctx, count: int = 100):
     try:
@@ -147,7 +133,7 @@ async def leave(ctx):
 # Discord 봇 및 Flask 서버 실행
 def run_discord_bot():
     try:
-        bot.run(os.getenv("DISCORD_TOKEN"))
+        bot.run(DISCORD_TOKEN)
     except Exception as e:
         logging.error(f"Error while running Discord bot: {e}")
 
