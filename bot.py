@@ -8,6 +8,13 @@ import threading
 import logging
 import yt_dlp as youtube_dl
 print(f"Discord Token: {os.getenv('DISCORD_TOKEN_PYTHON')}")
+print("Bot script is running.")
+print(f"DEBUG: Environment token load test")
+print(f"Discord Token: {os.getenv('DISCORD_TOKEN_PYTHON')}")
+if DISCORD_TOKEN is None:
+    raise ValueError("DISCORD_TOKEN_PYTHON environment variable not found.")
+with open("debug_log.txt", "a") as f:
+    f.write(f"Discord Token: {os.getenv('DISCORD_TOKEN_PYTHON')}\n")
 
 # 로깅 설정
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(levelname)s] %(message)s")
