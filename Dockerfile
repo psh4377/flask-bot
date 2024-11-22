@@ -13,7 +13,7 @@ COPY node-bot ./
 FROM python:3.13-slim AS python-bot-stage
 
 # Dockerfile의 RUN 명령에 --no-cache 옵션 추가
-RUN apt-get update --no-cache && apt-get install -y \
+RUN apt-get update && apt-get install -y \
     ffmpeg \
     && apt-get clean
 
