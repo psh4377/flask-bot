@@ -1,3 +1,5 @@
+print("Bot.py is running.")
+
 import os
 import discord
 from discord.ext import commands
@@ -7,14 +9,6 @@ import asyncio
 import threading
 import logging
 import yt_dlp as youtube_dl
-print(f"Discord Token: {os.getenv('DISCORD_TOKEN_PYTHON')}")
-print("Bot script is running.")
-print(f"DEBUG: Environment token load test")
-print(f"Discord Token: {os.getenv('DISCORD_TOKEN_PYTHON')}")
-if DISCORD_TOKEN is None:
-    raise ValueError("DISCORD_TOKEN_PYTHON environment variable not found.")
-with open("debug_log.txt", "a") as f:
-    f.write(f"Discord Token: {os.getenv('DISCORD_TOKEN_PYTHON')}\n")
 
 # 로깅 설정
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -57,7 +51,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN_PYTHON")
 if not DISCORD_TOKEN:
     raise ValueError("Discord token is not set in environment variables!")
-
+    
 @bot.event
 async def on_ready():
     logging.info(f"Logged in as {bot.user}")
