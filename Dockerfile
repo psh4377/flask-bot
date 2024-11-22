@@ -40,4 +40,4 @@ COPY --from=python-bot-stage /app /app
 WORKDIR /app
 
 # Node.js와 Python 봇 병렬 실행
-CMD ["sh", "-c", "ls /app && ls /node-bot && python bot.py"]
+CMD ["sh", "-c", "ls /app && python -m pip list && python bot.py"]
