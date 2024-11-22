@@ -21,7 +21,7 @@ WORKDIR /app
 
 # Python 의존성 설치
 COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+RUN python -m pip install --no-cache-dir -r requirements.txt
 RUN pip install --no-cache-dir discord.py==2.4.0
 
 COPY . ./
