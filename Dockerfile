@@ -23,6 +23,7 @@ WORKDIR /app
 # Python 의존성 설치
 COPY requirements.txt ./  # requirements.txt 복사
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir discord.py==2.4.0
 
 # Python 소스 파일 복사
 COPY bot.py /app/bot.py  # bot.py를 /app 디렉토리에 복사
@@ -39,5 +40,5 @@ COPY --from=python-bot-stage /app /app
 # 작업 디렉토리 설정
 WORKDIR /app
 
-# Node.js와 Python 봇 병렬 실행
-CMD ["sh", "-c", "ls /app && python -m pip list && python bot.py"]
+# Node.js와 Python 봇을 병렬 실행하는 대신, 한 번에 하나씩 실행
+CMD ["sh", "-c", "ls /app && node /node-bot/index.js && python /app/bot.py"]
