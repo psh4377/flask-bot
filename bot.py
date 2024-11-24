@@ -2,11 +2,16 @@ import os
 import discord
 from discord.ext import commands
 from flask import Flask, request
+from dotenv import load_dotenv
 import urllib.parse
 import asyncio
 import threading
 import logging
 import yt_dlp as youtube_dl
+
+
+# 환경 변수 로드
+load_dotenv()  # 여기 추가: .env 파일에서 환경 변수 로드
 
 # 로깅 설정
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -49,9 +54,15 @@ intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-DISCORD_TOKEN = os.getenv("DISCORD_TOKEN_PYTHON")
+# DISCORD_TOKEN을 환경 변수에서 가져오기
+DISCORD_TOKEN = os.getenv("DISCORD_TOKEN_PYTHON")  # 여기 추가: 환경 변수에서 토큰 불러오기
+
+# 디버깅 코드 추가: 토큰이 잘 불러와졌는지 확인
+print(f"Discord Token: {DISCORD_TOKEN}")  # 여기에 토큰을 출력해서 확인
+
+
 if not DISCORD_TOKEN:
-    raise ValueError("Discord token is not set in environment variables!")
+    raise ValueError("Discord token is not set in environment variables!")  # 토큰이 없으면 오류 발생
     
 @bot.event
 async def on_ready():
@@ -138,7 +149,7 @@ async def leave(ctx):
 # Discord 봇 및 Flask 서버 실행
 def run_discord_bot():
     try:
-        bot.run(DISCORD_TOKEN_PYTHON)
+        bot.run(DISCORD_TOKEN)
     except Exception as e:
         logging.error(f"Error while running Discord bot: {e}")
 
