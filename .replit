@@ -1,0 +1,18 @@
+modules = ["python-3.12", "web", "ffmpeg"]
+run = "python3 bot.py & python3 flask_app.py"
+
+[nix]
+channel = "stable-24_05"
+
+[env]
+# 올바른 환경 변수 이름 설정
+DISCORD_TOKEN_PYTHON = "YOUR_DISCORD_TOKEN_PYTHON"
+
+[entry]
+run = "python3 flask_app.py & python3 bot.py"
+
+[deployment]
+run = ["sh", "-c", "sh install.sh && python3 bot.py & python3 flask_app.py"]
+
+[[ports]]
+localPort = 8080
