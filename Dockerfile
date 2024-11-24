@@ -41,4 +41,4 @@ COPY --from=python-bot-stage /app /app
 WORKDIR /app
 
 # Node.js와 Python 봇을 병렬 실행하는 대신, 한 번에 하나씩 실행
-CMD ["sh", "-c", "ls /app && node /node-bot/index.js && python /app/bot.py"]
+CMD ["sh", "-c", "ls /app && ls /node-bot && python /app/bot.py"]

@@ -1,10 +1,4 @@
 import os
-
-# 디버깅: /app 디렉토리 내용 출력
-print("Files in /app directory:", os.listdir('/app'))  # /app 디렉토리의 파일 목록을 출력
-
-DISCORD_TOKEN = os.getenv("DISCORD_TOKEN_PYTHON")  # 환경 변수 확인
-print(f"Discord Token: {DISCORD_TOKEN}")  # 환경 변수가 제대로 로드되었는지 확인
 import discord
 from discord.ext import commands
 from flask import Flask, request
@@ -144,7 +138,7 @@ async def leave(ctx):
 # Discord 봇 및 Flask 서버 실행
 def run_discord_bot():
     try:
-        bot.run(DISCORD_TOKEN)
+        bot.run(DISCORD_TOKEN_PYTHON)
     except Exception as e:
         logging.error(f"Error while running Discord bot: {e}")
 
